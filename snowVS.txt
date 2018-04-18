@@ -1,0 +1,73 @@
+/* shader to update a particle system based on a simple kinematics function */
+#version 410 core
+
+layout (location = 0) in vec3 v_i; // initial velocity
+layout (location = 1) in vec3 p_i; // initial velocity
+layout (location = 2) in float start_time;
+
+uniform mat4 V, P;
+uniform vec3 emitter_pos_wor; // emitter position in world coordinates
+uniform float elapsed_system_time; // system time in seconds
+
+// the fragment shader can use this for it's output colour's alpha component 
+out float lifeStage;
+
+float lifeExpence = 20.0f;
+
+void main() {
+
+	// work out the elapsed time for _this particle_ after its start time
+        // t is also age of particle
+
+        float generatorSpeed = 0.005;
+	float t = (elapsed_system_time - start_time)* generatorSpeed;
+        
+
+	// recycling: particle reborns after died
+	t = mod (t, lifeExpence);
+	lifeStage = 0.0;
+
+        //position
+	vec3 p = p_i;
+
+        //forces on 
+	// constant force:  gravity - ish
+	vec3 g = vec3 (0.0, -0.08, 0.0);
+	// this is a standard kinematics equation of motion with velocity and
+	// acceleration (gravity), assuming m=1.0;
+        vec3 v = v_i + g * t;
+
+        //slight wind
+        vec3 w = vec3 (0.0, 0.0, 0.2);
+
+        //combined force
+        vec3 f = g + w;
+        //vec3 a = vec3 (0.0, 0.0, 0.0);
+        
+
+         // two ways to calculate positions, below is interesting
+        //v += f * t;
+        //p += v * t;
+
+        // physical way:
+        p += v_i * t + 0.5 * f * t * t ;
+
+        //collision
+// if yet to collide with the groud
+        if ( p.y <= -0.0 ) {
+      
+              v = -v * 0.7;
+              
+        
+        
+              
+              p += v * t;
+     
+        }
+
+	// particle's color depends on its lifeStage
+	lifeStage = t / lifeExpence;
+	
+	gl_Position = P * V * vec4 (p, 1.0);
+	gl_PointSize = 10.0; // particle's size in pixels
+}

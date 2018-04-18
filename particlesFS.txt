@@ -1,0 +1,43 @@
+/* shader to render simple particle system points */
+#version 410 core
+
+in float lifeStage;
+
+out vec4 frag_colour;
+
+//vec4 particle_colour = vec4 (0.0, 0.3, 1.0, 1.0); 
+
+vec4 y = vec4( 0.84, 0.96, 0.0, 1.0 );
+vec4 r = vec4( 1.0, 0.0, 0.0, 1.0 );
+vec4 o = vec4( 0.96, 0.36, 0.0, 1.0 );
+vec4 b = vec4( 0.0, 0.0, 1.0, 1.0 );
+vec4 q = vec4( 0.0, 0.78, 0.96, 1.0 );
+
+
+float remap( float minval, float maxval, float curval )
+{
+    return ( curval - minval ) / ( maxval - minval );
+}
+
+void main () {
+	// using point texture coordinates which are pre-defined over the point
+	
+       if (lifeStage <= 0.3) 
+
+            frag_colour = b;
+        
+        else if (lifeStage <= 0.6) 
+
+            frag_colour = mix( b, q, remap( 0.3, 0.6, lifeStage) );
+
+        else  if (lifeStage <= 0.8) 
+
+            frag_colour = mix( q, r, remap( 0.6, 0.8, lifeStage) );
+
+        else 
+
+            frag_colour = r;
+      
+        //frag_colour = vec4 (0.0, 0.0, 1.0, 1.0);
+         
+}
